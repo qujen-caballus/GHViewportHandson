@@ -206,11 +206,10 @@ void ViewportMenuItem_CheckedChanged(object sender, EventArgs e)
                 }
             }
         }
-        ```
-        
-        <p>
-        and add SetupMenu() viewportMenuItem.CheckedChanged += ViewportMenuItem_CheckedChanged;
-        
-        </p>
+```        
+ 
+<p>
+and add SetupMenu() viewportMenuItem.CheckedChanged += ViewportMenuItem_CheckedChanged
+</p>
        
                         
