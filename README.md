@@ -5,7 +5,9 @@
   <p>
     This hands-on organized by qujen, and by Hands-onTokyoAECIndustryDevGroup on August 1.<br /> 
     Here are some of the Handsons I have held in the past.<br />
-    #ここにリンクを挿
+    <a href="https://www.youtube.com/watch?v=XeggaRxMI4g&t=7229s">MagnetHandson</a>
+    <a href="https://www.youtube.com/watch?v=gK3fGKEiI8A&t=3171s">CuntomePanel</a>
+    <a href="https://www.youtube.com/watch?v=2XWGspQsG-8&t=3893s">GHGL Raymarching</a>
     This hands-on will be recorded and uploaded to the community discord and Youtube. I also use <a href = "https://www.deepl.com/">Deepl</a>for translation.
   </p>
 </div>
@@ -29,9 +31,6 @@
     <li>learn how to hack the GH ribbon.</li>
     <li>learn how to use WPF</li>
   </ol>
-  
-  <h4>Deliverables</h4>
-  #ここに成果物のスクショ
 </div>
 
 <h3>Let's coding!</h3>
