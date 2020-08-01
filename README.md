@@ -1,5 +1,5 @@
 # GHViewportHandson
-<h2>GrasshopperViewPortHandson for Imeditate</h2>
+<h2>GrasshopperViewPortHandson for InterMeditate</h2>
 <h3>About Handson</h3>
 <div>
   <p>
