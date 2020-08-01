@@ -209,7 +209,82 @@ void ViewportMenuItem_CheckedChanged(object sender, EventArgs e)
 ```        
  
 <p>
-and add SetupMenu() viewportMenuItem.CheckedChanged += ViewportMenuItem_CheckedChanged
+and add SetupMenu() viewportMenuItem.CheckedChanged += ViewportMenuItem_CheckedChanged </br>
+It's not easy to work with as it is, so we'll fix the panel in the upper right corner. </br>
 </p>
+
+```c#
+ void ViewportMenuItem_CheckedChanged(object sender, EventArgs e)
+        {
+            /*
+            var v = Rhino.RhinoApp.Version;
+            if (v.Major < 6 || (v.Major == 6 && v.Minor < 3))
+            {
+                // The viewport control does not work very well pre 6.3
+                Rhino.UI.Dialogs.ShowMessage("Canvas viewport requires Rhino 6.3 or greater version", "New Version Required");
+                return;
+            }
+            */
+
+
+            var menuitem = sender as ToolStripMenuItem;
+            if (menuitem != null)
+            {
+                if (menuitem.Checked)
+                {
+                    if (_viewportControlPanel == null)
+                    {
+                        _viewportControlPanel = new Panel();
+                        _viewportControlPanel.Size = new Size(400, 300);
+                        _viewportControlPanel.MinimumSize = new Size(50, 50);
+                        _viewportControlPanel.Padding = new Padding(10);
+                        var ctrl = new CanvasViewportControl();
+                        ctrl.Dock = DockStyle.Fill;
+
+
+                        _viewportControlPanel.BorderStyle = BorderStyle.Fixed3D;
+                        _viewportControlPanel.Controls.Add(ctrl);
+                        _viewportControlPanel.Location = new Point(0, 0);
+                        _viewportControlPanel.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+                        
+                        Grasshopper.Instances.ActiveCanvas.Controls.Add(_viewportControlPanel);
+                        Fix(AnchorStyles.Top | AnchorStyles.Right);
+                    }
+                    _viewportControlPanel.Show();
+
+                }
+                else
+                {
+                    if (_viewportControlPanel != null && _viewportControlPanel.Visible)
+                        _viewportControlPanel.Hide();
+
+                }
+            }
+        }
+
+        void Fix(AnchorStyles anchor)
+        {
+            FixPanel(_viewportControlPanel, anchor);
+        }
+
+        public static void FixPanel(Control ctrl, AnchorStyles anchor)
+        {
+            if (ctrl == null)
+                return;
+            var canvas = Grasshopper.Instances.ActiveCanvas;
+            var canvasSize = canvas.ClientSize;
+            int xEnd = 0;
+            if ((anchor & AnchorStyles.Right) == AnchorStyles.Right)
+                xEnd = canvasSize.Width - ctrl.Width;
+            int yEnd = 0;
+            if ((anchor & AnchorStyles.Bottom) == AnchorStyles.Bottom)
+                yEnd = canvasSize.Height - ctrl.Height;
+
+            ctrl.Location = new System.Drawing.Point(xEnd, yEnd);
+            ctrl.Anchor = anchor;
+        }
+    }
+```
+
        
                         
