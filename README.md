@@ -216,17 +216,6 @@ It's not easy to work with as it is, so we'll fix the panel in the upper right c
 ```c#
  void ViewportMenuItem_CheckedChanged(object sender, EventArgs e)
         {
-            /*
-            var v = Rhino.RhinoApp.Version;
-            if (v.Major < 6 || (v.Major == 6 && v.Minor < 3))
-            {
-                // The viewport control does not work very well pre 6.3
-                Rhino.UI.Dialogs.ShowMessage("Canvas viewport requires Rhino 6.3 or greater version", "New Version Required");
-                return;
-            }
-            */
-
-
             var menuitem = sender as ToolStripMenuItem;
             if (menuitem != null)
             {
@@ -238,12 +227,8 @@ It's not easy to work with as it is, so we'll fix the panel in the upper right c
                         _viewportControlPanel.Size = new Size(400, 300);
                         _viewportControlPanel.MinimumSize = new Size(50, 50);
                         _viewportControlPanel.Padding = new Padding(10);
-                        var ctrl = new CanvasViewportControl();
-                        ctrl.Dock = DockStyle.Fill;
-
 
                         _viewportControlPanel.BorderStyle = BorderStyle.Fixed3D;
-                        _viewportControlPanel.Controls.Add(ctrl);
                         _viewportControlPanel.Location = new Point(0, 0);
                         _viewportControlPanel.Anchor = AnchorStyles.Top | AnchorStyles.Left;
                         
@@ -286,5 +271,173 @@ It's not easy to work with as it is, so we'll fix the panel in the upper right c
     }
 ```
 
-       
+<h4>View Rhino on Panel</h4>       
                         
+create a new file (as component file) and renamed ViewPanelControl.cs.
+and write codes.
+
+```c#
+ class CanvasViewportControl : RhinoWindows.Forms.Controls.ViewportControl
+    {
+    }
+```
+
+and call ViewportMenuItem_CheckedChanged method.
+
+<h4>Chamge the Viewer Panel Size</h4>
+<p>Generate some states by enum</p>
+
+```c#
+ enum Mode
+            {
+                None,
+                SizeWE,
+                SizeNS,
+                SizeNWSE,
+                SizeNESW,
+                Move
+            }
+            Mode _mode;
+```
+<p>Create a method for estimating your location</p>
+```c#
+ Mode EstimatingLocation(Point location)
+            {
+                //var dock = Anchor;
+                switch (Anchor)
+                {
+                    case (AnchorStyles.Left | AnchorStyles.Top):
+                        {
+                            if (location.X > (Width - Padding.Right))
+                                return location.Y > (Height - Padding.Bottom) ? Mode.SizeNWSE : Mode.SizeWE;
+                            if (location.Y > (Height - Padding.Bottom))
+                                return Mode.SizeNS;
+                            if (location.X < Padding.Left || location.Y < Padding.Top)
+                                return Mode.None;
+                            return Mode.None;
+                        }
+                    case (AnchorStyles.Left | AnchorStyles.Bottom):
+                        {
+                            if (location.X > (Width - Padding.Right))
+                                return location.Y < Padding.Top ? Mode.SizeNESW : Mode.SizeWE;
+                            if (location.Y < Padding.Top)
+                                return Mode.SizeNS;
+                            if (location.X < Padding.Left || location.Y > (Height - Padding.Bottom))
+                                return Mode.None;
+                            return Mode.None;
+
+                        }
+                    case (AnchorStyles.Right | AnchorStyles.Top):
+                        {
+                            if (location.X < Padding.Left)
+                                return location.Y > (Height - Padding.Bottom) ? Mode.SizeNESW : Mode.SizeWE;
+                            if (location.Y > (Height - Padding.Bottom))
+                                return Mode.SizeNS;
+                            if (location.X > (Width - Padding.Right) || location.Y < Padding.Top)
+                                return Mode.None;
+                            return Mode.None;
+                        }
+                    case (AnchorStyles.Right | AnchorStyles.Bottom):
+                        {
+                            if (location.X < Padding.Left)
+                                return location.Y < Padding.Top ? Mode.SizeNWSE : Mode.SizeWE;
+                            if (location.Y < Padding.Top)
+                                return Mode.SizeNS;
+                            if (location.X > (Width - Padding.Right) || location.Y > (Height - Padding.Bottom))
+                                return Mode.None;
+                            return Mode.None;
+                        }
+                }
+               return Mode.None;
+            }
+```
+
+<p>Write a process to change the size</p>
+
+```c#
+            protected override void OnMouseDown(MouseEventArgs e)
+            {
+                _mode = Mode.None;
+                if (e.Button == MouseButtons.Left)
+                {
+                    _mode = EstimatingLocation(e.Location);
+                    LeftMouseDownLocation = e.Location;
+                    LeftMouseDownSize = Size;
+                }
+                base.OnMouseDown(e);
+            }
+            
+            
+            protected override void OnMouseMove(MouseEventArgs e)
+            {
+                if (_mode != Mode.None)
+                {
+                    int x = Location.X;
+                    int y = Location.Y;
+                    int width = Width;
+                    int height = Height;
+
+                    int deltaX = e.X - LeftMouseDownLocation.X;
+                    int deltaY = e.Y - LeftMouseDownLocation.Y;
+                    if (_mode == Mode.SizeNESW || _mode == Mode.SizeNS || _mode == Mode.SizeNWSE)
+                    {
+                        if ((Anchor & AnchorStyles.Top) == AnchorStyles.Top)
+                            height = LeftMouseDownSize.Height + deltaY;
+                        if ((Anchor & AnchorStyles.Bottom) == AnchorStyles.Bottom)
+                        {
+                            var pt = new Point(Location.X, Location.Y + deltaY);
+                            height = Height - (pt.Y - Location.Y);
+                            y = Location.Y + deltaY;
+                        }
+                    }
+                    if (_mode == Mode.SizeNESW || _mode == Mode.SizeWE || _mode == Mode.SizeNWSE)
+                    {
+                        if ((Anchor & AnchorStyles.Left) == AnchorStyles.Left)
+                            width = LeftMouseDownSize.Width + deltaX;
+                        if ((Anchor & AnchorStyles.Right) == AnchorStyles.Right)
+                        {
+                            var pt = new Point(Location.X + deltaX, Location.Y);
+                            width = Width - (pt.X - Location.X);
+                            x = Location.X + deltaX;
+                        }
+                    }
+                    SetBounds(x, y, width, height);
+                }
+                base.OnMouseMove(e);
+            }
+```
+
+<p>If I don't, it will follow the mouse, so I'll write a process to change it</p>
+
+<h4>Chage the Cursor</h4>
+<p>Change the display of the mouse cursor depending on the state of the enum</p>
+
+```c#
+ public override Cursor Cursor
+            {
+                get
+                {
+                    var location = PointToClient(Control.MousePosition);
+                    var mode = EstimatingLocation(location);
+                    switch (mode)
+                    {
+                        case Mode.None:
+                            return Cursors.Default;
+                        case Mode.Move:
+                            return Cursors.SizeAll;
+                        case Mode.SizeNESW:
+                            return Cursors.SizeNESW;
+                        case Mode.SizeNS:
+                            return Cursors.SizeNS;
+                        case Mode.SizeWE:
+                            return Cursors.SizeWE;
+                        case Mode.SizeNWSE:
+                            return Cursors.SizeNWSE;
+                    }
+                    return base.Cursor;
+                }
+                set => base.Cursor = value;
+            }
+```
+
+Finish!
