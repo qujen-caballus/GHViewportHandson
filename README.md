@@ -284,7 +284,7 @@ and write codes.
 
 and call ViewportMenuItem_CheckedChanged method.
 
-<h4>Chamge the Viewer Panel Size</h4>
+<h4>Change the Viewer Panel Size</h4>
 <p>Generate some states by enum</p>
 
 ```c#
@@ -300,6 +300,7 @@ and call ViewportMenuItem_CheckedChanged method.
             Mode _mode;
 ```
 <p>Create a method for estimating your location</p>
+
 ```c#
  Mode EstimatingLocation(Point location)
             {
