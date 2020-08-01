@@ -18,7 +18,7 @@
   <ul>
     <li>Windows10 Home</li>
     <li>Visual Studio 2019</li>
-    <li>Rhinoceros6</li>
+    <li>Rhinoceros6.3 or greater version</li>
     <li><a href="https://marketplace.visualstudio.com/items?itemName=McNeel.GrasshopperAssemblyforv6">Grasshopper Templates fot v6</li>
   </ul>
   
@@ -112,3 +112,105 @@ and more
         }
    ```
         
+The exceptions are not fully handled at this point, so we'll make it look like we handled the exception
+
+```c#
+        Eto.Forms.UITimer _timer;
+        Panel _viewportControlPanel;
+
+        public void AddToMenu()
+        {
+            if (_timer != null)
+                return;
+            _timer = new Eto.Forms.UITimer();
+            _timer.Interval = 1;
+            _timer.Elapsed += SetupMenu;
+            _timer.Start();
+        }
+
+        void SetupMenu(object sender, EventArgs e)
+        {
+            var editor = Grasshopper.Instances.DocumentEditor;
+            if (null == editor || editor.Handle == IntPtr.Zero)
+                return;
+
+            var controls = editor.Controls;
+            if (null == controls || controls.Count == 0)
+                return;
+
+            _timer.Stop();
+            foreach (var ctrl in controls)
+            {
+                var menu = ctrl as Grasshopper.GUI.GH_MenuStrip;
+                if (menu == null)
+                    continue;
+                for (int i = 0; i < menu.Items.Count; i++)
+                {
+                    var menuitem = menu.Items[i] as ToolStripMenuItem;
+                    if (menuitem != null && menuitem.Text == "Display")
+                    {
+                        for (int j = 0; j < menuitem.DropDownItems.Count; j++)
+                        {
+                            if (menuitem.DropDownItems[j].Text.StartsWith("canvas widgets", StringComparison.OrdinalIgnoreCase))
+                            {
+                                var viewportMenuItem = new ToolStripMenuItem("Rhino Viewport");
+                                viewportMenuItem.CheckOnClick = true;
+                                menuitem.DropDownOpened += (s, args) =>
+                                {
+                                    if (_viewportControlPanel != null && _viewportControlPanel.Visible)
+                                        viewportMenuItem.Checked = true;
+                                    else
+                                        viewportMenuItem.Checked = false;
+                                };
+                                var canvasWidgets = menuitem.DropDownItems[j] as ToolStripMenuItem;
+                                if (canvasWidgets != null)
+                                {
+                                    canvasWidgets.DropDownOpening += (s, args) =>
+                                        canvasWidgets.DropDownItems.Insert(0, viewportMenuItem);
+                                }
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+```
+
+<h4>Add Viewer Panel</h4>
+
+```c#
+void ViewportMenuItem_CheckedChanged(object sender, EventArgs e)
+        {var menuitem = sender as ToolStripMenuItem;
+            if (menuitem != null)
+            {
+                if (menuitem.Checked)
+                {
+                    if (_viewportControlPanel == null)
+                    {
+                        _viewportControlPanel = new Panel();
+                        _viewportControlPanel.Size = new System.Drawing.Size(400, 300);
+                        _viewportControlPanel.MinimumSize = new System.Drawing.Size(50, 50);
+                        _viewportControlPanel.Padding = new Padding(10);
+                        Grasshopper.Instances.ActiveCanvas.Controls.Add(_viewportControlPanel);
+                         }
+                    _viewportControlPanel.Show();
+
+                }
+                else
+                {
+                    if (_viewportControlPanel != null && _viewportControlPanel.Visible)
+                        _viewportControlPanel.Hide();
+
+                }
+            }
+        }
+        ```
+        
+        <p>
+        and add SetupMenu() viewportMenuItem.CheckedChanged += ViewportMenuItem_CheckedChanged;
+        
+        </p>
+       
+                        
