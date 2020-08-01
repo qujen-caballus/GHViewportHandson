@@ -53,7 +53,7 @@
 and more
 </div>
 
-<h4>Add Menu</h4>
+<u><h4>Add Menu</h4></u>
 
   ```c#
 
@@ -177,7 +177,7 @@ The exceptions are not fully handled at this point, so we'll make it look like w
         }
 ```
 
-<h4>Add Viewer Panel</h4>
+<u><h4>Add Viewer Panel</h4></u>
 
 ```c#
 void ViewportMenuItem_CheckedChanged(object sender, EventArgs e)
@@ -270,20 +270,11 @@ It's not easy to work with as it is, so we'll fix the panel in the upper right c
     }
 ```
 
-<h4>View Rhino on Panel</h4>       
-                        
-create a new file (as component file) and renamed ViewPanelControl.cs.
-and write codes.
+<u><h4>View Rhino on Panel</h4></u> 
+Add this code
+var ctrl = new RhinoWindows.Forms.Controls.ViewportControl();
 
-```c#
- class CanvasViewportControl : RhinoWindows.Forms.Controls.ViewportControl
-    {
-    }
-```
-
-and call ViewportMenuItem_CheckedChanged method.
-
-<h4>Change the Viewer Panel Size</h4>
+<h4><u>Change the Viewer Panel Size</u></h4>
 <p>Generate some states by enum</p>
 
 ```c#
@@ -409,7 +400,7 @@ and call ViewportMenuItem_CheckedChanged method.
 
 <p>If I don't, it will follow the mouse, so I'll write a process to change it</p>
 
-<h4>Chage the Cursor</h4>
+<u><h4>Chage the Cursor</h4></u>
 <p>Change the display of the mouse cursor depending on the state of the enum</p>
 
 ```c#
